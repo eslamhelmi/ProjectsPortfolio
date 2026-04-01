@@ -1,149 +1,223 @@
-// html-grid.scss v1.0 | @ajlkn | MIT licensed */
+// breakpoints.scss v1.0 | @ajlkn | MIT licensed */
+
+// Vars.
+
+	/// Breakpoints.
+	/// @var {list}
+	$breakpoints: () !global;
 
 // Mixins.
 
-	/// Initializes the current element as an HTML grid.
-	/// @param {mixed} $gutters Gutters (either a single number to set both column/row gutters, or a list to set them individually).
-	/// @param {mixed} $suffix Column class suffix (optional; either a single suffix or a list).
-	@mixin html-grid($gutters: 1.5em, $suffix: '') {
+	/// Sets breakpoints.
+	/// @param {map} $x Breakpoints.
+	@mixin breakpoints($x: ()) {
+		$breakpoints: $x !global;
+	}
 
-		// Initialize.
-			$cols: 12;
-			$multipliers: 0, 0.25, 0.5, 1, 1.50, 2.00;
-			$unit: 100% / $cols;
+	/// Wraps @content in a @media block targeting a specific orientation.
+	/// @param {string} $orientation Orientation.
+	@mixin orientation($orientation) {
+		@media screen and (orientation: #{$orientation}) {
+			@content;
+		}
+	}
 
-			// Suffixes.
-				$suffixes: null;
+	/// Wraps @content in a @media block using a given query.
+	/// @param {string} $query Query.
+	@mixin breakpoint($query: null) {
 
-				@if (type-of($suffix) == 'list') {
-					$suffixes: $suffix;
+		$breakpoint: null;
+		$op: null;
+		$media: null;
+
+		// Determine operator, breakpoint.
+
+			// Greater than or equal.
+				@if (str-slice($query, 0, 2) == '>=') {
+
+					$op: 'gte';
+					$breakpoint: str-slice($query, 3);
+
 				}
+
+			// Less than or equal.
+				@elseif (str-slice($query, 0, 2) == '<=') {
+
+					$op: 'lte';
+					$breakpoint: str-slice($query, 3);
+
+				}
+
+			// Greater than.
+				@elseif (str-slice($query, 0, 1) == '>') {
+
+					$op: 'gt';
+					$breakpoint: str-slice($query, 2);
+
+				}
+
+			// Less than.
+				@elseif (str-slice($query, 0, 1) == '<') {
+
+					$op: 'lt';
+					$breakpoint: str-slice($query, 2);
+
+				}
+
+			// Not.
+				@elseif (str-slice($query, 0, 1) == '!') {
+
+					$op: 'not';
+					$breakpoint: str-slice($query, 2);
+
+				}
+
+			// Equal.
 				@else {
-					$suffixes: ($suffix);
-				}
 
-			// Gutters.
-				$guttersCols: null;
-				$guttersRows: null;
-
-				@if (type-of($gutters) == 'list') {
-
-					$guttersCols: nth($gutters, 1);
-					$guttersRows: nth($gutters, 2);
-
-				}
-				@else {
-
-					$guttersCols: $gutters;
-					$guttersRows: 0;
+					$op: 'eq';
+					$breakpoint: $query;
 
 				}
 
-		// Row.
-			display: flex;
-			flex-wrap: wrap;
-			box-sizing: border-box;
-			align-items: stretch;
+		// Build media.
+			@if ($breakpoint and map-has-key($breakpoints, $breakpoint)) {
 
-			// Columns.
-				> * {
-					box-sizing: border-box;
-				}
+				$a: map-get($breakpoints, $breakpoint);
 
-			// Gutters.
-				&.gtr-uniform {
-					> * {
-						> :last-child {
-							margin-bottom: 0;
-						}
-					}
-				}
+				// Range.
+					@if (type-of($a) == 'list') {
 
-			// Alignment.
-				&.aln-left {
-					justify-content: flex-start;
-				}
+						$x: nth($a, 1);
+						$y: nth($a, 2);
 
-				&.aln-center {
-					justify-content: center;
-				}
+						// Max only.
+							@if ($x == null) {
 
-				&.aln-right {
-					justify-content: flex-end;
-				}
-
-				&.aln-top {
-					align-items: flex-start;
-				}
-
-				&.aln-middle {
-					align-items: center;
-				}
-
-				&.aln-bottom {
-					align-items: flex-end;
-				}
-
-		// Step through suffixes.
-			@each $suffix in $suffixes {
-
-				// Suffix.
-					@if ($suffix != '') {
-						$suffix: '-' + $suffix;
-					}
-					@else {
-						$suffix: '';
-					}
-
-				// Row.
-
-					// Important.
-						> .imp#{$suffix} {
-							order: -1;
-						}
-
-					// Columns, offsets.
-						@for $i from 1 through $cols {
-							> .col-#{$i}#{$suffix} {
-								width: $unit * $i;
-							}
-
-							> .off-#{$i}#{$suffix} {
-								margin-left: $unit * $i;
-							}
-						}
-
-					// Step through multipliers.
-						@each $multiplier in $multipliers {
-
-							// Gutters.
-								$class: null;
-
-								@if ($multiplier != 1) {
-									$class: '.gtr-' + ($multiplier * 100);
-								}
-
-								&#{$class} {
-									margin-top: ($guttersRows * $multiplier * -1);
-									margin-left: ($guttersCols * $multiplier * -1);
-
-									> * {
-										padding: ($guttersRows * $multiplier) 0 0 ($guttersCols * $multiplier);
+								// Greater than or equal (>= 0 / anything)
+									@if ($op == 'gte') {
+										$media: 'screen';
 									}
 
-									// Uniform.
-										&.gtr-uniform {
-											margin-top: $guttersCols * $multiplier * -1;
+								// Less than or equal (<= y)
+									@elseif ($op == 'lte') {
+										$media: 'screen and (max-width: ' + $y + ')';
+									}
 
-											> * {
-												padding-top: $guttersCols * $multiplier;
-											}
-										}
+								// Greater than (> y)
+									@elseif ($op == 'gt') {
+										$media: 'screen and (min-width: ' + ($y + 1) + ')';
+									}
 
-								}
+								// Less than (< 0 / invalid)
+									@elseif ($op == 'lt') {
+										$media: 'screen and (max-width: -1px)';
+									}
 
-						}
+								// Not (> y)
+									@elseif ($op == 'not') {
+										$media: 'screen and (min-width: ' + ($y + 1) + ')';
+									}
 
+								// Equal (<= y)
+									@else {
+										$media: 'screen and (max-width: ' + $y + ')';
+									}
+
+							}
+
+						// Min only.
+							@else if ($y == null) {
+
+								// Greater than or equal (>= x)
+									@if ($op == 'gte') {
+										$media: 'screen and (min-width: ' + $x + ')';
+									}
+
+								// Less than or equal (<= inf / anything)
+									@elseif ($op == 'lte') {
+										$media: 'screen';
+									}
+
+								// Greater than (> inf / invalid)
+									@elseif ($op == 'gt') {
+										$media: 'screen and (max-width: -1px)';
+									}
+
+								// Less than (< x)
+									@elseif ($op == 'lt') {
+										$media: 'screen and (max-width: ' + ($x - 1) + ')';
+									}
+
+								// Not (< x)
+									@elseif ($op == 'not') {
+										$media: 'screen and (max-width: ' + ($x - 1) + ')';
+									}
+
+								// Equal (>= x)
+									@else {
+										$media: 'screen and (min-width: ' + $x + ')';
+									}
+
+							}
+
+						// Min and max.
+							@else {
+
+								// Greater than or equal (>= x)
+									@if ($op == 'gte') {
+										$media: 'screen and (min-width: ' + $x + ')';
+									}
+
+								// Less than or equal (<= y)
+									@elseif ($op == 'lte') {
+										$media: 'screen and (max-width: ' + $y + ')';
+									}
+
+								// Greater than (> y)
+									@elseif ($op == 'gt') {
+										$media: 'screen and (min-width: ' + ($y + 1) + ')';
+									}
+
+								// Less than (< x)
+									@elseif ($op == 'lt') {
+										$media: 'screen and (max-width: ' + ($x - 1) + ')';
+									}
+
+								// Not (< x and > y)
+									@elseif ($op == 'not') {
+										$media: 'screen and (max-width: ' + ($x - 1) + '), screen and (min-width: ' + ($y + 1) + ')';
+									}
+
+								// Equal (>= x and <= y)
+									@else {
+										$media: 'screen and (min-width: ' + $x + ') and (max-width: ' + $y + ')';
+									}
+
+							}
+
+					}
+
+				// String.
+					@else {
+
+						// Missing a media type? Prefix with "screen".
+							@if (str-slice($a, 0, 1) == '(') {
+								$media: 'screen and ' + $a;
+							}
+
+						// Otherwise, use as-is.
+							@else {
+								$media: $a;
+							}
+
+					}
+
+			}
+
+		// Output.
+	        @media #{$media} {
+				@content;
 			}
 
 	}

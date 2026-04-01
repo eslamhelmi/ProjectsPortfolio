@@ -4,184 +4,45 @@
 /// Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 ///
 
-/* Type */
+/* Basic */
 
-	body, input, select, textarea {
-		color: _palette(fg);
-		font-family: _font(family);
-		font-size: 13pt;
-		font-weight: _font(weight);
-		line-height: 1.65;
-
-		@include breakpoint('<=xlarge') {
-			font-size: 11pt;
+	// MSIE: Required for IEMobile.
+		@-ms-viewport {
+			width: device-width;
 		}
 
-		@include breakpoint('<=large') {
-			font-size: 10pt;
+	// MSIE: Prevents scrollbar from overlapping content.
+		body {
+			-ms-overflow-style: scrollbar;
 		}
 
-		@include breakpoint('<=xxsmall') {
-			font-size: 9pt;
-		}
-	}
-
-	a {
-		@include vendor('transition', (
-			'color #{_duration(transition)} ease-in-out',
-			'border-bottom-color #{_duration(transition)} ease-in-out'
-		));
-		border-bottom: dotted 1px;
-		color: _palette(accent);
-		text-decoration: none;
-
-		&:hover {
-			border-bottom-color: _palette(accent);
-			color: _palette(accent) !important;
-
-			strong {
-				color: inherit;
+	// Ensures page width is always >=320px.
+		@include breakpoint('<=xsmall') {
+			html, body {
+				min-width: 320px;
 			}
 		}
-	}
 
-	strong, b {
-		color: _palette(fg-bold);
-		font-weight: _font(weight-bold);
-	}
-
-	em, i {
-		font-style: italic;
-	}
-
-	p {
-		margin: 0 0 _size(element-margin) 0;
-	}
-
-	h1, h2, h3, h4, h5, h6 {
-		color: _palette(fg-bold);
-		font-family: _font(family-heading);
-		font-weight: _font(weight-heading);
-		line-height: 1.5;
-		margin: 0 0 (_size(element-margin) * 0.5) 0;
-
-		a {
-			color: inherit;
-			text-decoration: none;
-			border-bottom: 0;
-		}
-	}
-
-	h1 {
-		font-size: 4em;
-		margin: 0 0 (_size(element-margin) * 0.25) 0;
-		line-height: 1.3;
-	}
-
-	h2 {
-		font-size: 1.75em;
-	}
-
-	h3 {
-		font-size: 1.25em;
-	}
-
-	h4 {
-		font-size: 1.1em;
-	}
-
-	h5 {
-		font-size: 0.9em;
-	}
-
-	h6 {
-		font-size: 0.7em;
-	}
-
-	@include breakpoint('<=xlarge') {
-		h1 {
-			font-size: 3.5em;
-		}
-	}
-
-	@include breakpoint('<=medium') {
-		h1 {
-			font-size: 3.25em;
-		}
-	}
-
-	@include breakpoint('<=small') {
-		h1 {
-			font-size: 2em;
-			line-height: 1.4;
+	// Set box model to border-box.
+	// Based on css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice
+		html {
+			box-sizing: border-box;
 		}
 
-		h2 {
-			font-size: 1.5em;
+		*, *:before, *:after {
+			box-sizing: inherit;
 		}
-	}
 
-	sub {
-		font-size: 0.8em;
-		position: relative;
-		top: 0.5em;
-	}
+	body {
+		background: _palette(bg);
 
-	sup {
-		font-size: 0.8em;
-		position: relative;
-		top: -0.5em;
-	}
+		// Stops initial animations until page loads or stops resizing.
+			&.is-preload,
+			&.is-resizing {
+				*, *:before, *:after {
+					@include vendor('animation', 'none !important');
+					@include vendor('transition', 'none !important');
+				}
+			}
 
-	blockquote {
-		border-left: solid 3px _palette(border);
-		font-style: italic;
-		margin: 0 0 _size(element-margin) 0;
-		padding: (_size(element-margin) / 4) 0 (_size(element-margin) / 4) _size(element-margin);
-	}
-
-	code {
-		background: _palette(border-bg);
-		border-radius: _size(border-radius);
-		border: solid 1px _palette(border);
-		font-family: _font(family-fixed);
-		font-size: 0.9em;
-		margin: 0 0.25em;
-		padding: 0.25em 0.65em;
-	}
-
-	pre {
-		-webkit-overflow-scrolling: touch;
-		font-family: _font(family-fixed);
-		font-size: 0.9em;
-		margin: 0 0 _size(element-margin) 0;
-
-		code {
-			display: block;
-			line-height: 1.75;
-			padding: 1em 1.5em;
-			overflow-x: auto;
-		}
-	}
-
-	hr {
-		border: 0;
-		border-bottom: solid 1px _palette(border);
-		margin: _size(element-margin) 0;
-
-		&.major {
-			margin: (_size(element-margin) * 1.5) 0;
-		}
-	}
-
-	.align-left {
-		text-align: left;
-	}
-
-	.align-center {
-		text-align: center;
-	}
-
-	.align-right {
-		text-align: right;
 	}

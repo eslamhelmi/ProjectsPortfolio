@@ -4,28 +4,71 @@
 /// Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 ///
 
-/* Mini Posts */
+/* Image */
 
-	.mini-posts {
-		article {
-			border-top: solid 1px _palette(border);
-			margin-top: _size(element-margin);
-			padding-top: _size(element-margin);
+	.image {
+		border-radius: _size(border-radius);
+		border: 0;
+		display: inline-block;
+		position: relative;
 
-			.image {
-				display: block;
-				margin: 0 0 (_size(element-margin) * 0.75) 0;
+		img {
+			border-radius: _size(border-radius);
+			display: block;
+		}
 
-				img {
-					display: block;
-					width: 100%;
-				}
+		&.left,
+		&.right {
+			max-width: 40%;
+
+			img {
+				width: 100%;
 			}
+		}
 
-			&:first-child {
-				border-top: 0;
-				margin-top: 0;
-				padding-top: 0;
+		&.left {
+			float: left;
+			padding: 0 1.5em 1em 0;
+			top: 0.25em;
+		}
+
+		&.right {
+			float: right;
+			padding: 0 0 1em 1.5em;
+			top: 0.25em;
+		}
+
+		&.fit {
+			display: block;
+			margin: 0 0 _size(element-margin) 0;
+			width: 100%;
+
+			img {
+				width: 100%;
+			}
+		}
+
+		&.main {
+			display: block;
+			margin: 0 0 (_size(element-margin) * 1.5) 0;
+			width: 100%;
+
+			img {
+				width: 100%;
+			}
+		}
+	}
+
+	a.image {
+		overflow: hidden;
+
+		img {
+			@include vendor('transition', 'transform #{_duration(transition)} ease');
+		}
+
+		&:hover {
+			img {
+				@include vendor('transform', 'scale(1.075)');
 			}
 		}
 	}

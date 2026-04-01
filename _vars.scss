@@ -4,95 +4,48 @@
 /// Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 ///
 
-/* Menu */
+/* Header */
 
-	#menu {
-		ul {
-			@include vendor('user-select', 'none');
-			color: _palette(fg-bold);
-			font-family: _font(family-heading);
-			font-weight: _font(weight-heading-alt);
-			letter-spacing: _font(kerning-heading);
-			list-style: none;
+	#header {
+		@include vendor('display', 'flex');
+		border-bottom: solid 5px _palette(accent);
+		padding: 6em 0 1em 0;
+		position: relative;
+
+		> * {
+			@include vendor('flex', '1');
 			margin-bottom: 0;
-			padding: 0;
-			text-transform: uppercase;
-
-			a, span {
-				border-bottom: 0;
-				color: inherit;
-				cursor: pointer;
-				display: block;
-				font-size: 0.9em;
-				padding: 0.625em 0;
-
-				&:hover {
-					color: _palette(accent);
-				}
-
-				&.opener {
-					@include vendor('transition', 'color #{_duration(transition)} ease-in-out');
-					@include icon(false, solid);
-					-webkit-tap-highlight-color: rgba(255,255,255,0);
-					position: relative;
-
-					&:before {
-						@include vendor('transition', (
-							'color #{_duration(transition)} ease-in-out',
-							'transform #{_duration(transition)} ease-in-out'
-						));
-						color: _palette(fg-light);
-						content: '\f078';
-						position: absolute;
-						right: 0;
-					}
-
-					&:hover {
-						&:before {
-							color: _palette(accent);
-						}
-					}
-
-					&.active {
-						& + ul {
-							display: block;
-						}
-
-						&:before {
-							@include vendor('transform', 'rotate(-180deg)');
-						}
-					}
-				}
-			}
 		}
 
-		> ul {
-			> li {
-				border-top: solid 1px _palette(border);
-				margin: 0.5em 0 0 0;
-				padding: 0.5em 0 0 0;
+		.logo {
+			border-bottom: 0;
+			color: inherit;
+			font-family: _font(family-heading);
+			font-size: 1.125em;
+		}
 
-				> ul {
-					color: _palette(fg-light);
-					display: none;
-					margin: 0.5em 0 1.5em 0;
-					padding-left: 1em;
+		.icons {
+			text-align: right;
+		}
 
-					a, span {
-						font-size: 0.8em;
-					}
+		@include breakpoint('<=xlarge') {
+			padding-top: 5em;
+		}
 
-					> li {
-						margin: 0.125em 0 0 0;
-						padding: 0.125em 0 0 0;
-					}
-				}
+		@include breakpoint('<=small') {
+			padding-top: 6.5em;
 
-				&:first-child {
-					border-top: 0;
-					margin-top: 0;
-					padding-top: 0;
-				}
+			.logo {
+				font-size: 1.25em;
+				margin: 0;
+			}
+
+			.icons {
+				height: (6.25em / 1.25);
+				line-height: (6.25em / 1.25);
+				position: absolute;
+				right: (-0.625em / 1.25);
+				top: 0;
 			}
 		}
 	}

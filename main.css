@@ -1,0 +1,317 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Demand Forecasting & Inventory Optimization | Eslam Helmi</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="../index.html" class="logo"><strong>Eslam Helmi</strong></a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/eslamhelmi/" class="icon brands fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://github.com/eslamhelmi" class="icon brands fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+										<li><a href="mailto:eslamhelmi1@gmail.com" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Demand Forecasting & Inventory Optimization</h1>
+										<p>IIF Certified Project | Lancaster University CMAF Program</p>
+									</header>
+
+									<span class="image main"><img src="../images/forecasting-banner.jpg" alt="Demand Forecasting" /></span>
+
+									<!-- Overview -->
+									<h2>Overview</h2>
+									<p>This project involved developing a comprehensive demand forecasting and inventory optimization framework for 20 consumer goods products. The work was completed as part of the Lancaster University Certified in Applied Forecasting (CMAF) program, certified by the International Institute of Forecasters (IIF).</p>
+
+									<div class="row">
+										<div class="col-6 col-12-small">
+											<h4>Project Scope</h4>
+											<ul>
+												<li>20 daily time series (70 days each)</li>
+												<li>Four product families (A, B, C, D)</li>
+												<li>Multiple demand patterns</li>
+												<li>1-week lead time</li>
+												<li>97% target service level</li>
+											</ul>
+										</div>
+										<div class="col-6 col-12-small">
+											<h4>Tools & Methods</h4>
+											<ul>
+												<li>R (forecast, smooth packages)</li>
+												<li>ETS, Croston, SBA, TSB methods</li>
+												<li>Rolling origin evaluation</li>
+												<li>RMSE, MASE, ME metrics</li>
+												<li>Safety stock calculation</li>
+											</ul>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Challenge -->
+									<h2>The Challenge</h2>
+									<p>The products exhibited diverse demand patterns that required different forecasting approaches:</p>
+									
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Family</th>
+													<th>Demand Pattern</th>
+													<th>Characteristics</th>
+													<th>Forecasting Challenge</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>A</td>
+													<td>Smooth/Variable</td>
+													<td>Regular demand, low variability</td>
+													<td>Capturing subtle trends</td>
+												</tr>
+												<tr>
+													<td>B</td>
+													<td>Variable/Erratic</td>
+													<td>High variability, potential outliers</td>
+													<td>Distinguishing signal from noise</td>
+												</tr>
+												<tr>
+													<td>C</td>
+													<td>Erratic</td>
+													<td>Irregular patterns, high CV</td>
+													<td>Managing forecast uncertainty</td>
+												</tr>
+												<tr>
+													<td>D</td>
+													<td>Intermittent</td>
+													<td>Many zero-demand periods</td>
+													<td>Handling sparse demand</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Approach -->
+									<h2>Approach</h2>
+									
+									<h3>1. Demand Classification</h3>
+									<p>Products were classified using Coefficient of Variation (CV) and zero-demand percentage to determine appropriate forecasting methods:</p>
+									<ul>
+										<li><strong>Families A & C:</strong> Standard methods (MA, ETS, SES)</li>
+										<li><strong>Family B:</strong> ETS and Naive (benchmark)</li>
+										<li><strong>Family D:</strong> Intermittent methods (Croston, SBA, TSB, Zero)</li>
+									</ul>
+
+									<h3>2. Rolling Origin Evaluation</h3>
+									<p>Rather than a single train/test split, I used rolling origin evaluation with 15 origins and a 7-day forecast horizon. This provides more robust accuracy estimates and simulates real forecasting conditions.</p>
+
+									<h3>3. Method Selection Framework</h3>
+									<p>I developed a hierarchical decision framework to select the best method for each product:</p>
+									
+									<div class="box">
+										<h4>Selection Gates</h4>
+										<ol>
+											<li><strong>Gate 1 - Bias Filter:</strong> Exclude methods with |ME| > 10% of mean demand (Family D exempt due to stochastic zeros)</li>
+											<li><strong>Gate 2 - Accuracy:</strong> Select method with lowest RMSE among remaining candidates</li>
+											<li><strong>Gate 3 - Complexity:</strong> If RMSE within 5%, prefer lower AICc (parsimony)</li>
+										</ol>
+										<p><strong>MASE Role:</strong> Reported for insight only; MASE ≥ 1 flags products needing investigation but doesn't exclude methods (high MASE can reflect demand difficulty, not method failure).</p>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Results -->
+									<h2>Results</h2>
+									
+									<h3>Method Selection Summary</h3>
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Family</th>
+													<th>Winning Methods</th>
+													<th>Avg Safety Stock % of Mean</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>A (Smooth)</td>
+													<td>MA (3/5), ETS (2/5)</td>
+													<td>18.2%</td>
+												</tr>
+												<tr>
+													<td>B (Variable)</td>
+													<td>ETS (3/5), Naive (2/5)</td>
+													<td>48.7%</td>
+												</tr>
+												<tr>
+													<td>C (Erratic)</td>
+													<td>MA (3/5), ETS (2/5)</td>
+													<td>154.0%</td>
+												</tr>
+												<tr>
+													<td>D (Intermittent)</td>
+													<td>Croston (3/5), SBA (2/5)</td>
+													<td>327.3%</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<h3>Key Insights</h3>
+									<ul>
+										<li><strong>Simple methods performed well:</strong> Moving Average won for 6 of 10 products in Families A and C, demonstrating that complexity doesn't always improve accuracy.</li>
+										<li><strong>Family D requires specialized treatment:</strong> Standard methods fail for intermittent demand; Croston and SBA are essential.</li>
+										<li><strong>Safety stock scales with variability:</strong> Family D's high SS% (327%) reflects fundamental demand uncertainty, not method failure.</li>
+										<li><strong>RMSE directly links to safety stock:</strong> Using RMSE as the primary selection criterion ensures the chosen method minimizes inventory holding costs while maintaining service level.</li>
+									</ul>
+
+									<hr class="major" />
+
+									<!-- Safety Stock -->
+									<h2>Safety Stock Calculation</h2>
+									<p>Safety stock was calculated using the standard formula for a 97% cycle service level:</p>
+									
+									<div class="box">
+										<p><strong>Formula:</strong> Safety Stock = z × RMSE</p>
+										<p>Where z = 1.88 (97% service level) and RMSE is the 7-day ahead forecast error.</p>
+										<p><strong>Note:</strong> Results were rounded up using ceiling() to ensure integer stock units.</p>
+									</div>
+
+									<h3>Limitations Acknowledged</h3>
+									<ul>
+										<li>The z-factor assumes normally distributed forecast errors; this may not hold for Families C and D with skewed demand.</li>
+										<li>For Family D products with SS > 300% of mean demand, alternative strategies (build-to-order, lower service level) may be more economical.</li>
+									</ul>
+
+									<hr class="major" />
+
+									<!-- Learnings -->
+									<h2>Key Learnings</h2>
+									<div class="row">
+										<div class="col-6 col-12-medium">
+											<h4>Technical</h4>
+											<ul>
+												<li>Rolling origin provides more reliable accuracy estimates than single holdout</li>
+												<li>MASE alone shouldn't drive method selection — it can misrepresent performance for difficult series</li>
+												<li>Bias (ME) matters: an accurate but biased forecast systematically over/understocks</li>
+												<li>AICc is valuable for tie-breaking but requires careful interpretation</li>
+											</ul>
+										</div>
+										<div class="col-6 col-12-medium">
+											<h4>Business</h4>
+											<ul>
+												<li>Not all products should be forecasted the same way</li>
+												<li>High safety stock isn't always a sign of poor forecasting — some demand is inherently unpredictable</li>
+												<li>The link between forecast accuracy and inventory cost should guide method selection</li>
+												<li>Simple methods often suffice; complexity should be justified by performance gains</li>
+											</ul>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- AI Statement -->
+									<h2>AI Assistance Statement</h2>
+									<p>Large Language Models (Claude) were used to support R coding and debugging. All analytical decisions, interpretations, and conclusions are my own.</p>
+
+									<hr class="major" />
+
+									<!-- Navigation -->
+									<ul class="actions">
+										<li><a href="../case-studies.html" class="button">← Back to Case Studies</a></li>
+										<li><a href="promotional-impact.html" class="button">Next: Promotional Impact →</a></li>
+									</ul>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="../index.html">Home</a></li>
+										<li><a href="../about.html">About Me</a></li>
+										<li>
+											<span class="opener active">Case Studies</span>
+											<ul>
+												<li><a href="cmaf-forecasting.html">Demand Forecasting</a></li>
+												<li><a href="otif-dashboard.html">OTIF Dashboard</a></li>
+												<li><a href="lead-time-analysis.html">Lead Time Analysis</a></li>
+												<li><a href="../case-studies.html">View All</a></li>
+											</ul>
+										</li>
+										<li><a href="../blog.html">Blog</a></li>
+										<li><a href="../contact.html">Contact</a></li>
+									</ul>
+								</nav>
+
+							<!-- Project Info -->
+								<section>
+									<header class="major">
+										<h2>Project Info</h2>
+									</header>
+									<ul class="alt">
+										<li><strong>Type:</strong> Coursework</li>
+										<li><strong>Program:</strong> Lancaster CMAF</li>
+										<li><strong>Certification:</strong> IIF</li>
+										<li><strong>Tools:</strong> R</li>
+										<li><strong>Status:</strong> Completed (Pass)</li>
+									</ul>
+								</section>
+
+							<!-- Section: Get in Touch -->
+								<section>
+									<header class="major">
+										<h2>Get in Touch</h2>
+									</header>
+									<p>Questions about this project?</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="mailto:eslamhelmi1@gmail.com">eslamhelmi1@gmail.com</a></li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Eslam Helmi. All rights reserved.<br />Design: <a href="https://html5up.net">HTML5 UP</a></p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>

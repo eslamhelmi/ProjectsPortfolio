@@ -1,44 +1,149 @@
-// Misc.
-	$misc: (
-		z-index-base:		10000
-	);
+// html-grid.scss v1.0 | @ajlkn | MIT licensed */
 
-// Duration.
-	$duration: (
-		nav:				0.5s,
-		transition:			0.2s
-	);
+// Mixins.
 
-// Size.
-	$size: (
-		border-radius:		0.375em,
-		element-height:		2.75em,
-		element-margin:		2em,
-		sidebar-width:		26em,
-		sidebar-width-alt:	24em,
-		gutter:				3em
-	);
+	/// Initializes the current element as an HTML grid.
+	/// @param {mixed} $gutters Gutters (either a single number to set both column/row gutters, or a list to set them individually).
+	/// @param {mixed} $suffix Column class suffix (optional; either a single suffix or a list).
+	@mixin html-grid($gutters: 1.5em, $suffix: '') {
 
-// Font.
-	$font: (
-		family:				('Open Sans', sans-serif),
-		family-heading:		('Roboto Slab', serif),
-		family-fixed:		('Courier New', monospace),
-		weight:				400,
-		weight-bold:		600,
-		weight-heading:		700,
-		weight-heading-alt:	400,
-		kerning-heading:	0.075em
-	);
+		// Initialize.
+			$cols: 12;
+			$multipliers: 0, 0.25, 0.5, 1, 1.50, 2.00;
+			$unit: 100% / $cols;
 
-// Palette.
-	$palette: (
-		bg:					#ffffff,
-		bg-alt:				#f5f6f7,
-		fg:					#7f888f,
-		fg-bold:			#3d4449,
-		fg-light:			#9fa3a6,
-		border:				rgba(210,215,217,0.75),
-		border-bg:			transparentize(#e6ebed, 0.75),
-		accent:				#f56a6a
-	);
+			// Suffixes.
+				$suffixes: null;
+
+				@if (type-of($suffix) == 'list') {
+					$suffixes: $suffix;
+				}
+				@else {
+					$suffixes: ($suffix);
+				}
+
+			// Gutters.
+				$guttersCols: null;
+				$guttersRows: null;
+
+				@if (type-of($gutters) == 'list') {
+
+					$guttersCols: nth($gutters, 1);
+					$guttersRows: nth($gutters, 2);
+
+				}
+				@else {
+
+					$guttersCols: $gutters;
+					$guttersRows: 0;
+
+				}
+
+		// Row.
+			display: flex;
+			flex-wrap: wrap;
+			box-sizing: border-box;
+			align-items: stretch;
+
+			// Columns.
+				> * {
+					box-sizing: border-box;
+				}
+
+			// Gutters.
+				&.gtr-uniform {
+					> * {
+						> :last-child {
+							margin-bottom: 0;
+						}
+					}
+				}
+
+			// Alignment.
+				&.aln-left {
+					justify-content: flex-start;
+				}
+
+				&.aln-center {
+					justify-content: center;
+				}
+
+				&.aln-right {
+					justify-content: flex-end;
+				}
+
+				&.aln-top {
+					align-items: flex-start;
+				}
+
+				&.aln-middle {
+					align-items: center;
+				}
+
+				&.aln-bottom {
+					align-items: flex-end;
+				}
+
+		// Step through suffixes.
+			@each $suffix in $suffixes {
+
+				// Suffix.
+					@if ($suffix != '') {
+						$suffix: '-' + $suffix;
+					}
+					@else {
+						$suffix: '';
+					}
+
+				// Row.
+
+					// Important.
+						> .imp#{$suffix} {
+							order: -1;
+						}
+
+					// Columns, offsets.
+						@for $i from 1 through $cols {
+							> .col-#{$i}#{$suffix} {
+								width: $unit * $i;
+							}
+
+							> .off-#{$i}#{$suffix} {
+								margin-left: $unit * $i;
+							}
+						}
+
+					// Step through multipliers.
+						@each $multiplier in $multipliers {
+
+							// Gutters.
+								$class: null;
+
+								@if ($multiplier != 1) {
+									$class: '.gtr-' + ($multiplier * 100);
+								}
+
+								&#{$class} {
+									margin-top: ($guttersRows * $multiplier * -1);
+									margin-left: ($guttersCols * $multiplier * -1);
+
+									> * {
+										padding: ($guttersRows * $multiplier) 0 0 ($guttersCols * $multiplier);
+									}
+
+									// Uniform.
+										&.gtr-uniform {
+											margin-top: $guttersCols * $multiplier * -1;
+
+											> * {
+												padding-top: $guttersCols * $multiplier;
+											}
+										}
+
+								}
+
+						}
+
+			}
+
+	}
