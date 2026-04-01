@@ -1,0 +1,445 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Demand Forecasting & Inventory Optimization | Islam Helmy</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="../index.html" class="logo"><strong>Islam Helmy</strong></a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/eslamhelmi/" class="icon brands fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://github.com/eslamhelmi" class="icon brands fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Demand Forecasting & Inventory Optimization</h1>
+										<p>IIF Certified Project | Lancaster University CMAF Program — Task 2</p>
+									</header>
+
+									<span class="image main"><img src="../images/task2-banner.jpg" alt="Demand Forecasting" /></span>
+
+									<!-- Overview -->
+									<h2>Overview</h2>
+									<p>This project involved developing a comprehensive demand forecasting and inventory optimization framework for 20 consumer goods products across four distinct demand patterns. Using rolling origin evaluation and a hierarchical method selection framework, I identified optimal forecasting methods for each product and calculated safety stock levels for a 97% service level.</p>
+
+									<div class="row">
+										<div class="col-6 col-12-small">
+											<h4>Project Scope</h4>
+											<ul>
+												<li>20 daily time series (70 days each)</li>
+												<li>Four product families (A, B, C, D)</li>
+												<li>Multiple demand patterns (smooth to intermittent)</li>
+												<li>1-week lead time</li>
+												<li>97% target service level (z = 1.88)</li>
+											</ul>
+										</div>
+										<div class="col-6 col-12-small">
+											<h4>Tools & Methods</h4>
+											<ul>
+												<li>R (forecast, smooth, tsintermittent)</li>
+												<li>ETS, MA, SES, Naive (standard methods)</li>
+												<li>Croston, SBA, TSB (intermittent methods)</li>
+												<li>Rolling origin evaluation (15 origins)</li>
+												<li>RMSE, MASE, ME metrics</li>
+											</ul>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Demand Classification -->
+									<h2>1. Demand Classification</h2>
+									<p>Products were classified using Coefficient of Variation (CV) and zero-demand percentage to determine appropriate forecasting approaches:</p>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Family</th>
+													<th>Demand Pattern</th>
+													<th>CV Range</th>
+													<th>Zero %</th>
+													<th>Recommended Methods</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><strong>A</strong></td>
+													<td>Smooth/Variable</td>
+													<td>0.3 - 0.5</td>
+													<td>0%</td>
+													<td>MA, ETS, SES</td>
+												</tr>
+												<tr>
+													<td><strong>B</strong></td>
+													<td>Variable/Erratic</td>
+													<td>0.5 - 0.8</td>
+													<td>0%</td>
+													<td>ETS, Naive</td>
+												</tr>
+												<tr>
+													<td><strong>C</strong></td>
+													<td>Erratic</td>
+													<td>0.8 - 1.5</td>
+													<td>0-20%</td>
+													<td>MA, ETS (damped)</td>
+												</tr>
+												<tr>
+													<td><strong>D</strong></td>
+													<td>Intermittent</td>
+													<td>>1.5</td>
+													<td>40-70%</td>
+													<td>Croston, SBA, TSB, Zero</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<span class="image fit"><img src="../images/task2-demand-patterns.jpg" alt="Demand Patterns by Family" /></span>
+									<p class="caption">Figure 1: Sample time series from each product family showing distinct demand patterns</p>
+
+									<hr class="major" />
+
+									<!-- Evaluation Framework -->
+									<h2>2. Rolling Origin Evaluation</h2>
+									<p>Rather than a single train/test split, I used <strong>rolling origin evaluation</strong> with 15 origins and a 7-day forecast horizon. This approach:</p>
+
+									<ul>
+										<li>Simulates real forecasting conditions where models are updated as new data arrives</li>
+										<li>Provides more robust accuracy estimates (15 forecasts instead of 1)</li>
+										<li>Allows calculation of both mean and variability of forecast errors</li>
+									</ul>
+
+									<div class="box">
+										<h4>Evaluation Setup</h4>
+										<ul>
+											<li><strong>Training window:</strong> Expanding (starts at 49 days, grows to 63)</li>
+											<li><strong>Forecast horizon:</strong> 7 days (matches lead time)</li>
+											<li><strong>Number of origins:</strong> 15</li>
+											<li><strong>Metrics:</strong> ME (bias), RMSE (accuracy), MASE (relative), AICc (complexity)</li>
+										</ul>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Method Selection Framework -->
+									<h2>3. Method Selection Framework</h2>
+									<p>I developed a <strong>hierarchical decision framework</strong> with three gates to select the best method for each product:</p>
+
+									<span class="image fit"><img src="../images/task2-framework.jpg" alt="Method Selection Framework" /></span>
+									<p class="caption">Figure 2: Three-gate method selection framework</p>
+
+									<div class="box">
+										<h4>Gate 1: Bias Filter</h4>
+										<p>Exclude methods where |ME| > 10% of mean demand</p>
+										<p><em>Rationale: Systematic bias leads to persistent over/understocking regardless of accuracy.</em></p>
+										<p><em>Exception: Family D exempt — zeros create stochastic bias, not systematic.</em></p>
+									</div>
+
+									<div class="box">
+										<h4>Gate 2: Accuracy Selection</h4>
+										<p>Among remaining methods, select the one with <strong>lowest RMSE</strong></p>
+										<p><em>Rationale: RMSE directly links to safety stock calculation (SS = z × RMSE).</em></p>
+									</div>
+
+									<div class="box">
+										<h4>Gate 3: Complexity Tie-Breaker</h4>
+										<p>If RMSE within 5%, prefer lower AICc (parsimony principle)</p>
+										<p><em>Rationale: Simpler models are more robust and interpretable.</em></p>
+									</div>
+
+									<div class="box">
+										<h4>MASE Role</h4>
+										<p>Reported for <strong>insight only</strong>, not selection. MASE ≥ 1 flags products needing investigation, but doesn't exclude methods.</p>
+										<p><em>Rationale: High MASE can reflect demand difficulty (erratic/intermittent), not method failure.</em></p>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Results -->
+									<h2>4. Results</h2>
+									
+									<h3>Method Selection Summary</h3>
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Family</th>
+													<th>Winning Methods</th>
+													<th>Avg RMSE</th>
+													<th>Avg Safety Stock</th>
+													<th>SS % of Mean</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><strong>A</strong> (Smooth)</td>
+													<td>MA (3/5), ETS (2/5)</td>
+													<td>51.3</td>
+													<td>97 units</td>
+													<td>18.2%</td>
+												</tr>
+												<tr>
+													<td><strong>B</strong> (Variable)</td>
+													<td>ETS (3/5), Naive (2/5)</td>
+													<td>195.9</td>
+													<td>369 units</td>
+													<td>48.7%</td>
+												</tr>
+												<tr>
+													<td><strong>C</strong> (Erratic)</td>
+													<td>MA (3/5), ETS (2/5)</td>
+													<td>182.3</td>
+													<td>343 units</td>
+													<td>154.0%</td>
+												</tr>
+												<tr>
+													<td><strong>D</strong> (Intermittent)</td>
+													<td>Croston (3/5), SBA (2/5)</td>
+													<td>142.1</td>
+													<td>268 units</td>
+													<td>327.3%</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<h3>Complete Results Table</h3>
+									<div class="table-wrapper">
+										<table class="alt">
+											<thead>
+												<tr>
+													<th>Product</th>
+													<th>Method</th>
+													<th>ME</th>
+													<th>RMSE</th>
+													<th>MASE</th>
+													<th>Safety Stock</th>
+													<th>Selection Reason</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr><td>A1</td><td>MA</td><td>5.21</td><td>49.76</td><td>0.89</td><td>94</td><td>AICc tie-breaker</td></tr>
+												<tr><td>A2</td><td>ETS</td><td>35.74</td><td>63.18</td><td>1.05</td><td>119</td><td>AICc tie-breaker</td></tr>
+												<tr><td>A3</td><td>MA</td><td>18.26</td><td>60.09</td><td>0.83</td><td>114</td><td>AICc tie-breaker</td></tr>
+												<tr><td>A4</td><td>ETS</td><td>-25.49</td><td>49.05</td><td>0.90</td><td>93</td><td>AICc tie-breaker</td></tr>
+												<tr><td>A5</td><td>MA</td><td>7.24</td><td>34.65</td><td>0.91</td><td>66</td><td>Lowest RMSE</td></tr>
+												<tr><td>B1</td><td>ETS</td><td>136.90</td><td>196.07</td><td>3.29</td><td>369</td><td>AICc tie-breaker</td></tr>
+												<tr><td>B2</td><td>Naive</td><td>-198.29</td><td>255.14</td><td>2.32</td><td>480</td><td>Lowest RMSE</td></tr>
+												<tr><td>B3</td><td>Naive</td><td>174.97</td><td>241.02</td><td>3.38</td><td>454</td><td>AICc tie-breaker</td></tr>
+												<tr><td>B4</td><td>ETS</td><td>-11.88</td><td>54.63</td><td>1.00</td><td>103</td><td>AICc tie-breaker</td></tr>
+												<tr><td>B5</td><td>ETS</td><td>71.52</td><td>232.69</td><td>7.16</td><td>438</td><td>AICc tie-breaker</td></tr>
+												<tr><td>C1</td><td>ETS</td><td>-4.71</td><td>13.24</td><td>0.24</td><td>25</td><td>AICc tie-breaker</td></tr>
+												<tr><td>C2</td><td>ETS</td><td>34.30</td><td>97.53</td><td>1.79</td><td>184</td><td>AICc tie-breaker</td></tr>
+												<tr><td>C3</td><td>MA</td><td>-1.71</td><td>11.84</td><td>0.63</td><td>23</td><td>AICc tie-breaker</td></tr>
+												<tr><td>C4</td><td>MA</td><td>-14.31</td><td>44.19</td><td>1.27</td><td>84</td><td>Lowest RMSE</td></tr>
+												<tr><td>C5</td><td>MA</td><td>250.02</td><td>744.50</td><td>4.10</td><td>1401</td><td>Lowest RMSE</td></tr>
+												<tr><td>D1</td><td>SBA</td><td>3.62</td><td>15.26</td><td>1.26</td><td>29</td><td>AICc tie-breaker</td></tr>
+												<tr><td>D2</td><td>Croston</td><td>-170.85</td><td>674.59</td><td>3.13</td><td>1269</td><td>AICc tie-breaker</td></tr>
+												<tr><td>D3</td><td>SBA</td><td>-2.79</td><td>9.66</td><td>1.49</td><td>19</td><td>Lowest RMSE</td></tr>
+												<tr><td>D4</td><td>Croston</td><td>-1.86</td><td>5.71</td><td>0.63</td><td>11</td><td>AICc tie-breaker</td></tr>
+												<tr><td>D5</td><td>Croston</td><td>0.08</td><td>5.32</td><td>0.86</td><td>10</td><td>AICc tie-breaker</td></tr>
+											</tbody>
+										</table>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Safety Stock -->
+									<h2>5. Safety Stock Calculation</h2>
+									<p>Safety stock was calculated using the standard formula for cycle service level:</p>
+
+									<div class="box">
+										<h4>Formula</h4>
+										<p><strong>Safety Stock = ceiling(z × RMSE)</strong></p>
+										<p>Where:</p>
+										<ul>
+											<li><strong>z = 1.88</strong> for 97% service level</li>
+											<li><strong>RMSE</strong> = forecast error standard deviation (7-day horizon)</li>
+											<li><strong>ceiling()</strong> = round up to integer units</li>
+										</ul>
+									</div>
+
+									<h3>Limitations Acknowledged</h3>
+									<ul>
+										<li><strong>Normality assumption:</strong> z-factor assumes normally distributed errors; may not hold for Families C and D with skewed demand</li>
+										<li><strong>Economic considerations:</strong> For Family D products with SS > 300% of mean, alternative strategies (build-to-order, lower service level) may be more economical</li>
+										<li><strong>Lead time variability:</strong> Fixed lead time assumed; if lead time varies, safety stock should be adjusted accordingly</li>
+									</ul>
+
+									<hr class="major" />
+
+									<!-- Key Insights -->
+									<h2>6. Key Insights</h2>
+
+									<div class="row">
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-lightbulb"></span> Simple Methods Win</h3>
+											<p>Moving Average won for 6 of 10 products in Families A and C. <strong>Complexity doesn't always improve accuracy.</strong> MA is also more interpretable for stakeholders.</p>
+										</div>
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-random"></span> Family D Needs Special Treatment</h3>
+											<p>Standard methods fail for intermittent demand. <strong>Croston and SBA are essential</strong> for products with many zero-demand periods.</p>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-balance-scale"></span> Bias Before Accuracy</h3>
+											<p>A method with low RMSE but high bias will <strong>systematically over/understock</strong>. The bias gate prevents this.</p>
+										</div>
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-link"></span> RMSE → Inventory Cost</h3>
+											<p>Using RMSE as the primary selection criterion ensures the chosen method <strong>minimizes safety stock</strong> while maintaining service level.</p>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-chart-area"></span> High SS Isn't Always Bad</h3>
+											<p>Family D's 327% SS reflects <strong>fundamental demand uncertainty</strong>, not method failure. Some demand is inherently unpredictable.</p>
+										</div>
+										<div class="col-6 col-12-medium">
+											<h3><span class="icon solid fa-exclamation-triangle"></span> MASE for Flagging, Not Selection</h3>
+											<p>High MASE (≥1) flags products needing investigation but <strong>shouldn't exclude methods</strong> — it can reflect demand difficulty.</p>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Code Sample -->
+									<h2>7. Code Sample: Rolling Origin Evaluation</h2>
+									<pre><code># Rolling origin evaluation for a single product
+evaluate_method <- function(ts_data, method, origins = 15, horizon = 7) {
+  n <- length(ts_data)
+  start <- n - origins - horizon + 1
+  
+  results <- sapply(1:origins, function(i) {
+    train_end <- start + i - 1
+    train <- ts_data[1:train_end]
+    test <- ts_data[(train_end + 1):(train_end + horizon)]
+    
+    # Fit model and forecast
+    if (method == "MA") {
+      fc <- rep(mean(tail(train, 7)), horizon)
+    } else if (method == "ETS") {
+      model <- ets(train)
+      fc <- forecast(model, h = horizon)$mean
+    }
+    
+    # Calculate errors
+    errors <- test - fc
+    c(ME = mean(errors), RMSE = sqrt(mean(errors^2)))
+  })
+  
+  rowMeans(results)
+}</code></pre>
+
+									<hr class="major" />
+
+									<!-- AI Statement -->
+									<h2>AI Assistance Statement</h2>
+									<p>Large Language Models (Claude) were used to support R coding and debugging. All analytical decisions, interpretations, and conclusions are my own.</p>
+
+									<hr class="major" />
+
+									<!-- Navigation -->
+									<ul class="actions">
+										<li><a href="cmaf-task1.html" class="button">← Previous: Promotional Impact</a></li>
+										<li><a href="../case-studies.html" class="button">Back to Case Studies</a></li>
+									</ul>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="../index.html">Home</a></li>
+										<li><a href="../about.html">About Me</a></li>
+										<li>
+											<span class="opener active">Case Studies</span>
+											<ul>
+												<li><a href="cmaf-task1.html">Promotional Impact Analysis</a></li>
+												<li><a href="cmaf-task2.html">Demand Forecasting</a></li>
+												<li><a href="otif-dashboard.html">OTIF Dashboard</a></li>
+												<li><a href="../case-studies.html">View All</a></li>
+											</ul>
+										</li>
+										<li><a href="../blog.html">Blog</a></li>
+										<li><a href="../contact.html">Contact</a></li>
+									</ul>
+								</nav>
+
+							<!-- Project Info -->
+								<section>
+									<header class="major">
+										<h2>Project Info</h2>
+									</header>
+									<ul class="alt">
+										<li><strong>Type:</strong> Certified Coursework</li>
+										<li><strong>Program:</strong> Lancaster CMAF</li>
+										<li><strong>Certification:</strong> IIF</li>
+										<li><strong>Tools:</strong> R</li>
+										<li><strong>Products:</strong> 20</li>
+										<li><strong>Service Level:</strong> 97%</li>
+										<li><strong>Status:</strong> Completed (Pass)</li>
+									</ul>
+								</section>
+
+							<!-- Key Results -->
+								<section>
+									<header class="major">
+										<h2>Method Winners</h2>
+									</header>
+									<ul class="alt">
+										<li>Family A: <strong>MA</strong> (3/5)</li>
+										<li>Family B: <strong>ETS</strong> (3/5)</li>
+										<li>Family C: <strong>MA</strong> (3/5)</li>
+										<li>Family D: <strong>Croston</strong> (3/5)</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Islam Helmy. All rights reserved.<br />Design: <a href="https://html5up.net">HTML5 UP</a></p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>

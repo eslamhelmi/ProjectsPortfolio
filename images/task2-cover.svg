@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22543d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#276749;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg2)"/>
+  <!-- Boxes icon for inventory -->
+  <g transform="translate(320, 100)">
+    <rect x="0" y="60" width="70" height="70" fill="#68d391" rx="8" stroke="#48bb78" stroke-width="3"/>
+    <rect x="80" y="60" width="70" height="70" fill="#68d391" rx="8" stroke="#48bb78" stroke-width="3"/>
+    <rect x="40" y="0" width="70" height="70" fill="#9ae6b4" rx="8" stroke="#48bb78" stroke-width="3"/>
+  </g>
+  <!-- Title -->
+  <text x="400" y="320" font-family="Arial, sans-serif" font-size="32" fill="white" text-anchor="middle" font-weight="bold">Demand Forecasting</text>
+  <text x="400" y="360" font-family="Arial, sans-serif" font-size="20" fill="#c6f6d5" text-anchor="middle">Inventory Optimization | 20 Products</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="16" fill="#9ae6b4" text-anchor="middle">CMAF Task 2 | IIF Certified</text>
+</svg>

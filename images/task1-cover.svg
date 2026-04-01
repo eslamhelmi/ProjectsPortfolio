@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c5282;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg1)"/>
+  <!-- Chart icon -->
+  <g transform="translate(300, 120)">
+    <rect x="0" y="80" width="40" height="120" fill="#63b3ed" rx="5"/>
+    <rect x="60" y="40" width="40" height="160" fill="#4299e1" rx="5"/>
+    <rect x="120" y="100" width="40" height="100" fill="#63b3ed" rx="5"/>
+    <rect x="180" y="20" width="40" height="180" fill="#4299e1" rx="5"/>
+  </g>
+  <!-- Title -->
+  <text x="400" y="340" font-family="Arial, sans-serif" font-size="32" fill="white" text-anchor="middle" font-weight="bold">Time Series Decomposition</text>
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="20" fill="#a0aec0" text-anchor="middle">Promotional Impact Analysis</text>
+  <text x="400" y="440" font-family="Arial, sans-serif" font-size="16" fill="#718096" text-anchor="middle">CMAF Task 1 | IIF Certified</text>
+</svg>

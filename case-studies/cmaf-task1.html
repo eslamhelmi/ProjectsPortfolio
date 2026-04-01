@@ -1,0 +1,450 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Time Series Decomposition & Promotional Impact | Islam Helmy</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="../index.html" class="logo"><strong>Islam Helmy</strong></a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/eslamhelmi/" class="icon brands fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://github.com/eslamhelmi" class="icon brands fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Time Series Decomposition & Promotional Impact Analysis</h1>
+										<p>IIF Certified Project | Lancaster University CMAF Program — Task 1</p>
+									</header>
+
+									<span class="image main"><img src="../images/task1-banner.jpg" alt="Time Series Decomposition" /></span>
+
+									<!-- Overview -->
+									<h2>Overview</h2>
+									<p>This project focused on analyzing daily sales data to understand underlying patterns and quantify the impact of promotional activities. Using time series decomposition and the ADAM framework with external regressors, I identified trend, seasonality, and promotion-driven effects, providing actionable business recommendations.</p>
+
+									<div class="row">
+										<div class="col-6 col-12-small">
+											<h4>Project Scope</h4>
+											<ul>
+												<li>70 days of daily sales data</li>
+												<li>Two promotional activities (Promo1, Promo2)</li>
+												<li>Weekly seasonality pattern</li>
+												<li>14-day forecast horizon</li>
+											</ul>
+										</div>
+										<div class="col-6 col-12-small">
+											<h4>Tools & Methods</h4>
+											<ul>
+												<li>R (forecast, smooth packages)</li>
+												<li>Time series decomposition</li>
+												<li>ETS(M,A,A) model</li>
+												<li>ADAM with external regressors</li>
+											</ul>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Data Exploration -->
+									<h2>1. Data Exploration</h2>
+									<p>Initial visualization of the sales data revealed clear patterns:</p>
+									
+									<div class="box">
+										<h4>Key Observations</h4>
+										<ul>
+											<li><strong>Strong weekly seasonality:</strong> Clear repeating pattern every 7 days</li>
+											<li><strong>Upward trend:</strong> Sales gradually increasing over the 10-week period</li>
+											<li><strong>Constant amplitude:</strong> Seasonal swings remain roughly the same size, suggesting an additive model</li>
+											<li><strong>Promotional effects:</strong> Promo1 (red markers) appears on both peaks and troughs; Promo2 (blue) mostly coincides with low-sales days</li>
+										</ul>
+									</div>
+
+									<span class="image fit"><img src="../images/task1-sales-plot.jpg" alt="Daily Sales with Promotions" /></span>
+									<p class="caption">Figure 1: Daily sales with promotional activities marked (Promo1 = red squares, Promo2 = blue dots)</p>
+
+									<hr class="major" />
+
+									<!-- Decomposition -->
+									<h2>2. Time Series Decomposition</h2>
+									<p>The sales data was decomposed into trend, seasonal, and irregular components using additive decomposition:</p>
+
+									<span class="image fit"><img src="../images/task1-decomposition.jpg" alt="Time Series Decomposition" /></span>
+									<p class="caption">Figure 2: Additive decomposition showing data, reconstructed fit, trend, season, and irregular components</p>
+
+									<h3>Trend Component</h3>
+									<p>The trend starts at approximately 98 units and increases to about 156 by the end of the period — roughly a <strong>60% increase over 10 weeks</strong>. This indicates strong underlying growth in demand.</p>
+
+									<h3>Seasonal Component</h3>
+									<p>The weekly seasonal pattern shows clear day-of-week effects:</p>
+									
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Day</th>
+													<th>Seasonal Effect</th>
+													<th>Interpretation</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Monday</td>
+													<td>-14.8</td>
+													<td>Below average</td>
+												</tr>
+												<tr>
+													<td>Tuesday</td>
+													<td>-0.7</td>
+													<td>Average</td>
+												</tr>
+												<tr>
+													<td>Wednesday</td>
+													<td>+13.9</td>
+													<td>Above average</td>
+												</tr>
+												<tr>
+													<td>Thursday</td>
+													<td>+21.0</td>
+													<td>Above average</td>
+												</tr>
+												<tr>
+													<td><strong>Friday</strong></td>
+													<td><strong>+55.2</strong></td>
+													<td><strong>Highest (peak)</strong></td>
+												</tr>
+												<tr>
+													<td>Saturday</td>
+													<td>-28.0</td>
+													<td>Below average</td>
+												</tr>
+												<tr>
+													<td><strong>Sunday</strong></td>
+													<td><strong>-45.9</strong></td>
+													<td><strong>Lowest (trough)</strong></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Residual Analysis -->
+									<h2>3. Residual Analysis</h2>
+									<p>The decomposition achieved an RMSE of 16.81, indicating reasonably small residuals. However, examination of the irregular component revealed important patterns:</p>
+
+									<span class="image fit"><img src="../images/task1-residuals.jpg" alt="Residuals Plot" /></span>
+									<p class="caption">Figure 3: Irregular (residual) component with promotional activity indicators</p>
+
+									<div class="box">
+										<h4>Residual Statistics</h4>
+										<ul>
+											<li><strong>Min:</strong> -32.3 | <strong>Max:</strong> +62.1</li>
+											<li><strong>Mean:</strong> 0.0 | <strong>Median:</strong> -1.05</li>
+											<li>Residuals centered around zero but slightly right-skewed</li>
+											<li>Notable spikes (+40 to +60) in weeks 6, 7, and 9 — coinciding with Promo1 activities</li>
+										</ul>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Promotional Impact -->
+									<h2>4. Promotional Impact Analysis</h2>
+									<p>To quantify promotional effects, I filtered for observations where promotions occurred AND residuals exceeded ±20:</p>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Date</th>
+													<th>Sales</th>
+													<th>Promo1</th>
+													<th>Promo2</th>
+													<th>Residual</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>2024-01-13</td>
+													<td>48</td>
+													<td>1</td>
+													<td>1</td>
+													<td>-29.3</td>
+												</tr>
+												<tr>
+													<td>2024-02-01</td>
+													<td>184</td>
+													<td>1</td>
+													<td>0</td>
+													<td>+36.7</td>
+												</tr>
+												<tr>
+													<td>2024-02-08</td>
+													<td>164</td>
+													<td>0</td>
+													<td>1</td>
+													<td>+22.4</td>
+												</tr>
+												<tr>
+													<td>2024-02-12</td>
+													<td>90</td>
+													<td>1</td>
+													<td>1</td>
+													<td>-22.2</td>
+												</tr>
+												<tr>
+													<td>2024-02-13</td>
+													<td>188</td>
+													<td>1</td>
+													<td>0</td>
+													<td>+62.1</td>
+												</tr>
+												<tr>
+													<td>2024-02-17</td>
+													<td>123</td>
+													<td>1</td>
+													<td>0</td>
+													<td>+23.7</td>
+												</tr>
+												<tr>
+													<td>2024-02-28</td>
+													<td>230</td>
+													<td>1</td>
+													<td>0</td>
+													<td>+57.7</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+
+									<p><strong>Key Finding:</strong> When Promo1 runs alone, it consistently produces large positive residuals (+23 to +62). When both promotions run together, residuals are negative (-22 to -29), suggesting a <strong>cannibalization effect</strong>.</p>
+
+									<hr class="major" />
+
+									<!-- ADAM Model -->
+									<h2>5. Quantifying Effects with ADAM</h2>
+									<p>To precisely quantify promotional impacts, I used the ADAM framework (ETS with external regressors), modeling the interaction between promotions:</p>
+
+									<pre><code>adam_model <- adam(data = mydata,
+                   model = "MAA",
+                   formula = y ~ Promo1 * Promo2,
+                   lags = 7,
+                   regressors = "use")</code></pre>
+
+									<div class="box">
+										<h4>ADAM Model Results</h4>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Parameter</th>
+														<th>Estimate</th>
+														<th>Interpretation</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>Promo1</strong></td>
+														<td>+36.3%</td>
+														<td>Significant positive impact when run alone</td>
+													</tr>
+													<tr>
+														<td><strong>Promo2</strong></td>
+														<td>+15.7%</td>
+														<td>Moderate positive impact when run alone</td>
+													</tr>
+													<tr>
+														<td><strong>Promo1 × Promo2</strong></td>
+														<td>-75.8%</td>
+														<td>Strong negative interaction (cannibalization)</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<p><strong>Model Fit:</strong> AICc = 558.4 vs. 721.5 for standard ETS — significantly better fit when promotions are modeled explicitly.</p>
+										<p><strong>Interesting Finding:</strong> Beta (trend) dropped to zero in the ADAM model, suggesting the apparent trend in the base ETS was partially driven by promotional effects, not underlying growth.</p>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Simple Forecasting Methods -->
+									<h2>6. Forecasting Methods Comparison</h2>
+									<p>I compared four forecasting approaches for a 14-day horizon:</p>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Method</th>
+													<th>Captures Trend?</th>
+													<th>Captures Seasonality?</th>
+													<th>Captures Promotions?</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Seasonal Naïve</td>
+													<td>No</td>
+													<td>Yes</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td>Moving Average (k=7)</td>
+													<td>No</td>
+													<td>No*</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td>SES (α=0.086)</td>
+													<td>No</td>
+													<td>No</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td><strong>ETS(M,A,A)</strong></td>
+													<td><strong>Yes</strong></td>
+													<td><strong>Yes</strong></td>
+													<td>No</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<p><em>*MA with k=7 smooths out seasonality by averaging exactly one week.</em></p>
+
+									<p><strong>Conclusion:</strong> ETS(M,A,A) is the most appropriate method as it captures both trend and seasonality. However, for operational forecasting, the ADAM model with promotional regressors provides superior accuracy when promotion schedules are known.</p>
+
+									<hr class="major" />
+
+									<!-- Business Recommendations -->
+									<h2>7. Business Recommendations</h2>
+
+									<div class="row">
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-check" style="color: green;"></span> Continue Promo1</h3>
+											<p>Promo1 demonstrates statistically significant and economically meaningful uplift (+36%). It should remain the primary promotional lever.</p>
+										</div>
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-search" style="color: orange;"></span> Revise Promo2</h3>
+											<p>Promo2's impact (+16%) is weaker and it tends to run on low-sales days. Investigate why it's less effective and consider repositioning.</p>
+										</div>
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-times" style="color: red;"></span> Avoid Overlap</h3>
+											<p>Running both promotions together creates cannibalization (-76% net effect). <strong>Never run both simultaneously.</strong></p>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Key Learnings -->
+									<h2>Key Learnings</h2>
+									<ul>
+										<li><strong>Decomposition reveals hidden patterns:</strong> Without decomposition, promotional effects would be confounded with seasonality.</li>
+										<li><strong>Residual analysis is powerful:</strong> Large residuals aren't just noise — they often indicate external drivers like promotions.</li>
+										<li><strong>Interaction effects matter:</strong> The cannibalization effect would be missed without modeling the Promo1 × Promo2 interaction.</li>
+										<li><strong>Apparent trends can be misleading:</strong> What looked like a 60% trend was partially promotional lift.</li>
+									</ul>
+
+									<hr class="major" />
+
+									<!-- AI Statement -->
+									<h2>AI Assistance Statement</h2>
+									<p>Large Language Models (Claude) were used to support R coding and debugging. All analytical decisions, interpretations, and conclusions are my own.</p>
+
+									<hr class="major" />
+
+									<!-- Navigation -->
+									<ul class="actions">
+										<li><a href="../case-studies.html" class="button">← Back to Case Studies</a></li>
+										<li><a href="cmaf-task2.html" class="button">Next: Demand Forecasting →</a></li>
+									</ul>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="../index.html">Home</a></li>
+										<li><a href="../about.html">About Me</a></li>
+										<li>
+											<span class="opener active">Case Studies</span>
+											<ul>
+												<li><a href="cmaf-task1.html">Promotional Impact Analysis</a></li>
+												<li><a href="cmaf-task2.html">Demand Forecasting</a></li>
+												<li><a href="otif-dashboard.html">OTIF Dashboard</a></li>
+												<li><a href="../case-studies.html">View All</a></li>
+											</ul>
+										</li>
+										<li><a href="../blog.html">Blog</a></li>
+										<li><a href="../contact.html">Contact</a></li>
+									</ul>
+								</nav>
+
+							<!-- Project Info -->
+								<section>
+									<header class="major">
+										<h2>Project Info</h2>
+									</header>
+									<ul class="alt">
+										<li><strong>Type:</strong> Certified Coursework</li>
+										<li><strong>Program:</strong> Lancaster CMAF</li>
+										<li><strong>Certification:</strong> IIF</li>
+										<li><strong>Tools:</strong> R</li>
+										<li><strong>Status:</strong> Completed (Pass)</li>
+									</ul>
+								</section>
+
+							<!-- Key Results -->
+								<section>
+									<header class="major">
+										<h2>Key Results</h2>
+									</header>
+									<ul class="alt">
+										<li>Promo1: <strong>+36%</strong> uplift</li>
+										<li>Promo2: <strong>+16%</strong> uplift</li>
+										<li>Combined: <strong>-76%</strong> (cannibalization)</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Islam Helmy. All rights reserved.<br />Design: <a href="https://html5up.net">HTML5 UP</a></p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>
