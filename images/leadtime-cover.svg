@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="leadtimeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a4731"/>
+      <stop offset="100%" style="stop-color:#276749"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#leadtimeBg)"/>
+  <g opacity="0.3" stroke="#68d391" stroke-width="2" fill="none">
+    <circle cx="150" cy="200" r="40"/>
+    <circle cx="300" cy="200" r="40"/>
+    <circle cx="450" cy="200" r="40"/>
+    <line x1="190" y1="200" x2="260" y2="200"/>
+    <line x1="340" y1="200" x2="410" y2="200"/>
+    <polygon points="260,195 260,205 270,200" fill="#68d391"/>
+    <polygon points="410,195 410,205 420,200" fill="#68d391"/>
+  </g>
+  <text x="300" y="300" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="bold">Lead Time Analysis</text>
+  <text x="300" y="330" font-family="Arial, sans-serif" font-size="16" fill="#9ae6b4" text-anchor="middle">&amp; Optimization</text>
+  <text x="300" y="370" font-family="Arial, sans-serif" font-size="12" fill="#68d391" text-anchor="middle">Power BI | Supply Chain</text>
+</svg>

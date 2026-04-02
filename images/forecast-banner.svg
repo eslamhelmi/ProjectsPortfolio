@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400">
+  <defs>
+    <linearGradient id="bannerBg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22543d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#276749;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2f855a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="400" fill="url(#bannerBg2)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.1" stroke="#9ae6b4" stroke-width="1">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="400"/>
+    <line x1="400" y1="0" x2="400" y2="400"/>
+    <line x1="600" y1="0" x2="600" y2="400"/>
+    <line x1="800" y1="0" x2="800" y2="400"/>
+    <line x1="1000" y1="0" x2="1000" y2="400"/>
+  </g>
+  
+  <!-- Box icons for inventory -->
+  <g opacity="0.25">
+    <rect x="900" y="180" width="80" height="80" fill="#68d391" rx="10" stroke="#48bb78" stroke-width="3"/>
+    <rect x="1000" y="180" width="80" height="80" fill="#68d391" rx="10" stroke="#48bb78" stroke-width="3"/>
+    <rect x="950" y="100" width="80" height="80" fill="#9ae6b4" rx="10" stroke="#48bb78" stroke-width="3"/>
+    <rect x="1050" y="100" width="80" height="80" fill="#9ae6b4" rx="10" stroke="#48bb78" stroke-width="3"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="450" y="160" font-family="Arial, sans-serif" font-size="48" fill="white" text-anchor="middle" font-weight="bold">Demand Forecasting</text>
+  <text x="450" y="220" font-family="Arial, sans-serif" font-size="32" fill="#9ae6b4" text-anchor="middle">&amp; Inventory Optimization</text>
+  
+  <!-- Subtitle -->
+  <text x="450" y="300" font-family="Arial, sans-serif" font-size="20" fill="#c6f6d5" text-anchor="middle">IIF Certified Project | Lancaster University CMAF Program</text>
+  
+  <!-- Stats -->
+  <g font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">
+    <text x="250" y="360">20 Products</text>
+    <text x="400" y="360">4 Families</text>
+    <text x="550" y="360">97% Service Level</text>
+    <text x="700" y="360">7-Day Lead Time</text>
+  </g>
+</svg>

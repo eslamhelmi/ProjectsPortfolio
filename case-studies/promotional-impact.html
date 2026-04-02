@@ -1,0 +1,608 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Time Series Decomposition & Promotional Impact | Islam Helmy</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<style>
+			pre { background: #1a1a2e; color: #eee; padding: 1.5em; border-radius: 8px; overflow-x: auto; font-size: 0.9em; line-height: 1.5; }
+			pre code { color: #eee; }
+			.code-comment { color: #6a9955; }
+			.code-string { color: #ce9178; }
+			.code-keyword { color: #569cd6; }
+			.code-function { color: #dcdcaa; }
+			.code-number { color: #b5cea8; }
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="../index.html" class="logo"><strong>Islam Helmy</strong></a>
+									<ul class="icons">
+										<li><a href="https://www.linkedin.com/in/eslamhelmi/" class="icon brands fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://github.com/eslamhelmi" class="icon brands fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Time Series Decomposition & Promotional Impact Analysis</h1>
+										<p>IIF Certified Project | Lancaster University CMAF Program</p>
+									</header>
+
+									<span class="image main"><img src="../images/promo-banner.svg" alt="Time Series Decomposition" /></span>
+
+									<!-- Overview -->
+									<h2>Overview</h2>
+									<p>This project focused on analyzing daily sales data to understand underlying patterns and quantify the impact of promotional activities. Using time series decomposition and the ADAM framework with external regressors, I identified trend, seasonality, and promotion-driven effects, providing actionable business recommendations.</p>
+
+									<div class="row">
+										<div class="col-6 col-12-small">
+											<h4>Project Scope</h4>
+											<ul>
+												<li>70 days of daily sales data</li>
+												<li>Two promotional activities (Promo1, Promo2)</li>
+												<li>Weekly seasonality pattern</li>
+												<li>14-day forecast horizon</li>
+											</ul>
+										</div>
+										<div class="col-6 col-12-small">
+											<h4>Tools & Methods</h4>
+											<ul>
+												<li>R (forecast, smooth, ggplot2)</li>
+												<li>Time series decomposition</li>
+												<li>ETS(M,A,A) model</li>
+												<li>ADAM with external regressors</li>
+											</ul>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Data Loading and Exploration -->
+									<h2>1. Data Loading & Exploration</h2>
+									<p>The analysis begins with loading and exploring the sales data to understand its structure and characteristics.</p>
+
+									<pre><code><span class="code-comment"># ============================================================
+# DATA LOADING AND PREPARATION
+# ============================================================</span>
+
+<span class="code-comment"># Load required libraries</span>
+<span class="code-function">library</span>(forecast)
+<span class="code-function">library</span>(smooth)
+<span class="code-function">library</span>(ggplot2)
+<span class="code-function">library</span>(dplyr)
+
+<span class="code-comment"># Import the sales data</span>
+sales_data <- <span class="code-function">read.csv</span>(<span class="code-string">"Task_1.csv"</span>)
+
+<span class="code-comment"># Examine structure</span>
+<span class="code-function">str</span>(sales_data)
+<span class="code-comment"># 'data.frame': 70 obs. of 4 variables:
+#  $ Date  : chr  "2024-01-01" "2024-01-02" ...
+#  $ y     : int  105 75 118 147 196 62 48 92 ...
+#  $ Promo1: int  0 0 0 0 0 0 1 0 ...
+#  $ Promo2: int  0 0 0 0 0 0 1 0 ...</span>
+
+<span class="code-comment"># Convert date column to proper Date type</span>
+sales_data$Date <- <span class="code-function">as.Date</span>(sales_data$Date)
+
+<span class="code-comment"># Summary statistics</span>
+<span class="code-function">summary</span>(sales_data$y)
+<span class="code-comment">#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#   48.00   94.75  130.50  131.90  166.25  244.00</span>
+
+<span class="code-comment"># Check promotion frequency</span>
+<span class="code-function">table</span>(sales_data$Promo1)  <span class="code-comment"># 0: 56, 1: 14 (20% of days)</span>
+<span class="code-function">table</span>(sales_data$Promo2)  <span class="code-comment"># 0: 61, 1: 9  (13% of days)</span>
+<span class="code-function">table</span>(sales_data$Promo1, sales_data$Promo2)
+<span class="code-comment">#      0   1
+#  0  53   3    <- Both off: 53 days
+#  1   8   6    <- Promo1 only: 8, Both on: 6</span></code></pre>
+
+									<h3>Visualization with Promotional Markers</h3>
+									<pre><code><span class="code-comment"># ============================================================
+# VISUALIZE SALES WITH PROMOTIONAL ACTIVITIES
+# ============================================================</span>
+
+<span class="code-comment"># Create visualization showing promotions on the time series</span>
+<span class="code-function">ggplot</span>(sales_data, <span class="code-function">aes</span>(x = Date, y = y)) +
+  <span class="code-function">geom_line</span>(color = <span class="code-string">"black"</span>, linewidth = <span class="code-number">0.8</span>) +
+  
+  <span class="code-comment"># Overlay Promo1 markers (red squares)</span>
+  <span class="code-function">geom_point</span>(
+    data = sales_data[sales_data$Promo1 == <span class="code-number">1</span>, ],
+    <span class="code-function">aes</span>(x = Date, y = y),
+    color = <span class="code-string">"red"</span>, size = <span class="code-number">5</span>, shape = <span class="code-number">15</span>
+  ) +
+  
+  <span class="code-comment"># Overlay Promo2 markers (blue circles)</span>
+  <span class="code-function">geom_point</span>(
+    data = sales_data[sales_data$Promo2 == <span class="code-number">1</span>, ],
+    <span class="code-function">aes</span>(x = Date, y = y),
+    color = <span class="code-string">"blue"</span>, size = <span class="code-number">3</span>, shape = <span class="code-number">16</span>
+  ) +
+  
+  <span class="code-function">labs</span>(
+    title = <span class="code-string">"Daily Sales with Promotions"</span>,
+    x = <span class="code-string">"Date"</span>,
+    y = <span class="code-string">"Sales"</span>,
+    caption = <span class="code-string">"Red squares = Promo1, Blue circles = Promo2"</span>
+  ) +
+  <span class="code-function">theme_minimal</span>()</code></pre>
+
+									<span class="image fit"><img src="../images/sales-with-promotions.png" alt="Daily Sales with Promotions" /></span>
+									<p class="caption">Figure 1: Daily sales with promotional activities marked (Promo1 = red squares, Promo2 = blue dots)</p>
+
+									<div class="box">
+										<h4>Key Observations</h4>
+										<ul>
+											<li><strong>Strong weekly seasonality:</strong> Clear repeating pattern every 7 days</li>
+											<li><strong>Upward trend:</strong> Sales gradually increasing over the 10-week period</li>
+											<li><strong>Promotional overlap:</strong> Promo1 appears on both peaks and troughs; Promo2 mostly coincides with low-sales days</li>
+										</ul>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Decomposition -->
+									<h2>2. Time Series Decomposition</h2>
+
+									<pre><code><span class="code-comment"># ============================================================
+# TIME SERIES DECOMPOSITION
+# ============================================================</span>
+
+<span class="code-comment"># Convert to time series object with weekly frequency</span>
+sales_ts <- <span class="code-function">ts</span>(sales_data$y, frequency = <span class="code-number">7</span>)
+
+<span class="code-comment"># Verify frequency detection</span>
+<span class="code-function">findfrequency</span>(sales_data$y)  <span class="code-comment"># Returns 7 - confirms weekly pattern</span>
+
+<span class="code-comment"># Perform additive decomposition using the smooth package</span>
+<span class="code-comment"># decomp() provides more control than base R decompose()</span>
+dc <- <span class="code-function">decomp</span>(
+  sales_ts, 
+  decomposition = <span class="code-string">"additive"</span>,
+  outplot = <span class="code-number">1</span>  <span class="code-comment"># Generate plot automatically</span>
+)
+
+<span class="code-comment"># Extract components for analysis</span>
+trend_component <- dc$trend
+seasonal_component <- dc$seasonal
+irregular_component <- dc$irregular
+
+<span class="code-comment"># Model fit statistics</span>
+<span class="code-function">print</span>(<span class="code-function">paste</span>(<span class="code-string">"Decomposition RMSE:"</span>, <span class="code-function">round</span>(dc$rmse, <span class="code-number">2</span>)))
+<span class="code-comment"># [1] "Decomposition RMSE: 16.81"</span></code></pre>
+
+									<span class="image fit"><img src="../images/promo-decomposition.png" alt="Time Series Decomposition" /></span>
+									<p class="caption">Figure 2: Additive decomposition showing data, reconstructed fit, trend, season, and irregular components</p>
+
+									<h3>Analyzing the Trend Component</h3>
+									<pre><code><span class="code-comment"># ============================================================
+# TREND ANALYSIS
+# ============================================================</span>
+
+<span class="code-comment"># Extract trend values at start and end</span>
+trend_start <- trend_component[<span class="code-number">1</span>]
+trend_end <- trend_component[<span class="code-function">length</span>(trend_component)]
+
+<span class="code-function">cat</span>(<span class="code-string">"Trend at start:"</span>, <span class="code-function">round</span>(trend_start, <span class="code-number">2</span>), <span class="code-string">"\n"</span>)
+<span class="code-comment"># Trend at start: 98.29</span>
+
+<span class="code-function">cat</span>(<span class="code-string">"Trend at end:"</span>, <span class="code-function">round</span>(trend_end, <span class="code-number">2</span>), <span class="code-string">"\n"</span>)
+<span class="code-comment"># Trend at end: 156.29</span>
+
+<span class="code-function">cat</span>(<span class="code-string">"Trend growth:"</span>, <span class="code-function">round</span>((trend_end - trend_start) / trend_start * <span class="code-number">100</span>, <span class="code-number">1</span>), <span class="code-string">"%\n"</span>)
+<span class="code-comment"># Trend growth: 59.0%</span></code></pre>
+
+									<h3>Seasonal Pattern Analysis</h3>
+									<pre><code><span class="code-comment"># ============================================================
+# SEASONAL PATTERN EXTRACTION
+# ============================================================</span>
+
+<span class="code-comment"># Get one complete seasonal cycle (7 days)</span>
+seasonal_cycle <- seasonal_component[<span class="code-number">1</span>:<span class="code-number">7</span>]
+day_names <- <span class="code-function">c</span>(<span class="code-string">"Mon"</span>, <span class="code-string">"Tue"</span>, <span class="code-string">"Wed"</span>, <span class="code-string">"Thu"</span>, <span class="code-string">"Fri"</span>, <span class="code-string">"Sat"</span>, <span class="code-string">"Sun"</span>)
+
+<span class="code-comment"># Create seasonal summary table</span>
+seasonal_summary <- <span class="code-function">data.frame</span>(
+  Day = day_names,
+  Effect = <span class="code-function">round</span>(seasonal_cycle, <span class="code-number">1</span>),
+  Interpretation = <span class="code-function">ifelse</span>(
+    seasonal_cycle > <span class="code-number">20</span>, <span class="code-string">"Peak"</span>,
+    <span class="code-function">ifelse</span>(seasonal_cycle < -<span class="code-number">20</span>, <span class="code-string">"Trough"</span>, <span class="code-string">"Average"</span>)
+  )
+)
+
+<span class="code-function">print</span>(seasonal_summary)
+<span class="code-comment">#   Day Effect Interpretation
+# 1 Mon  -14.8        Average
+# 2 Tue   -0.7        Average
+# 3 Wed   13.9        Average
+# 4 Thu   21.0           Peak
+# 5 Fri   55.2           Peak  <- Highest sales day
+# 6 Sat  -28.0         Trough
+# 7 Sun  -45.9         Trough <- Lowest sales day</span></code></pre>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Day</th>
+													<th>Seasonal Effect</th>
+													<th>Interpretation</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr><td>Monday</td><td>-14.8</td><td>Below average</td></tr>
+												<tr><td>Tuesday</td><td>-0.7</td><td>Average</td></tr>
+												<tr><td>Wednesday</td><td>+13.9</td><td>Above average</td></tr>
+												<tr><td>Thursday</td><td>+21.0</td><td>Above average</td></tr>
+												<tr><td><strong>Friday</strong></td><td><strong>+55.2</strong></td><td><strong>Peak (highest)</strong></td></tr>
+												<tr><td>Saturday</td><td>-28.0</td><td>Below average</td></tr>
+												<tr><td><strong>Sunday</strong></td><td><strong>-45.9</strong></td><td><strong>Trough (lowest)</strong></td></tr>
+											</tbody>
+										</table>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Residual Analysis -->
+									<h2>3. Residual Analysis & Promotional Detection</h2>
+
+									<pre><code><span class="code-comment"># ============================================================
+# RESIDUAL ANALYSIS WITH PROMOTIONAL FLAGS
+# ============================================================</span>
+
+<span class="code-comment"># Combine residuals with promotion data</span>
+analysis_df <- <span class="code-function">data.frame</span>(
+  Date = sales_data$Date,
+  Sales = sales_data$y,
+  Promo1 = sales_data$Promo1,
+  Promo2 = sales_data$Promo2,
+  Residual = <span class="code-function">as.numeric</span>(irregular_component)
+)
+
+<span class="code-comment"># Residual statistics</span>
+<span class="code-function">cat</span>(<span class="code-string">"Residual Summary:\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Min:"</span>, <span class="code-function">round</span>(<span class="code-function">min</span>(analysis_df$Residual), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Max:"</span>, <span class="code-function">round</span>(<span class="code-function">max</span>(analysis_df$Residual), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Mean:"</span>, <span class="code-function">round</span>(<span class="code-function">mean</span>(analysis_df$Residual), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  SD:"</span>, <span class="code-function">round</span>(<span class="code-function">sd</span>(analysis_df$Residual), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-comment"># Residual Summary:
+#   Min: -32.3
+#   Max: 62.1
+#   Mean: 0.0
+#   SD: 16.8</span>
+
+<span class="code-comment"># Filter for large residuals during promotions</span>
+large_residuals <- analysis_df %>%
+  <span class="code-function">filter</span>(
+    (Promo1 == <span class="code-number">1</span> | Promo2 == <span class="code-number">1</span>) &
+    (<span class="code-function">abs</span>(Residual) > <span class="code-number">20</span>)
+  ) %>%
+  <span class="code-function">arrange</span>(Date)
+
+<span class="code-function">print</span>(large_residuals)
+<span class="code-comment">#         Date Sales Promo1 Promo2 Residual
+# 1 2024-01-13    48      1      1    -29.3  <- Both promos, negative
+# 2 2024-02-01   184      1      0     36.7  <- Promo1 only, positive
+# 3 2024-02-08   164      0      1     22.4  <- Promo2 only, positive
+# 4 2024-02-12    90      1      1    -22.2  <- Both promos, negative
+# 5 2024-02-13   188      1      0     62.1  <- Promo1 only, LARGE positive
+# 6 2024-02-17   123      1      0     23.7  <- Promo1 only, positive
+# 7 2024-02-28   230      1      0     57.7  <- Promo1 only, positive</span>
+
+<span class="code-comment"># KEY INSIGHT: When both promotions run together, residuals are NEGATIVE
+# This suggests cannibalization between the two promotions!</span></code></pre>
+
+									<div class="box">
+										<h4>Critical Finding: Cannibalization Effect</h4>
+										<p>When Promo1 runs alone, residuals are consistently <strong>positive (+23 to +62)</strong>, indicating sales lift.</p>
+										<p>When both promotions run together, residuals are <strong>negative (-22 to -29)</strong>, suggesting the promotions cannibalize each other.</p>
+									</div>
+
+									<hr class="major" />
+
+									<!-- ADAM Model -->
+									<h2>4. Quantifying Promotional Effects with ADAM</h2>
+
+									<pre><code><span class="code-comment"># ============================================================
+# ADAM MODEL WITH PROMOTIONAL REGRESSORS
+# ============================================================</span>
+
+<span class="code-comment"># Prepare data as a data frame for adam()</span>
+model_data <- <span class="code-function">data.frame</span>(
+  y = sales_data$y,
+  Promo1 = sales_data$Promo1,
+  Promo2 = sales_data$Promo2
+)
+
+<span class="code-comment"># Fit ADAM model with multiplicative error, additive trend, additive seasonality</span>
+<span class="code-comment"># Include interaction term to capture cannibalization</span>
+adam_model <- <span class="code-function">adam</span>(
+  data = model_data,
+  model = <span class="code-string">"MAA"</span>,                    <span class="code-comment"># Multiplicative error, Additive trend & season</span>
+  lags = <span class="code-number">7</span>,                         <span class="code-comment"># Weekly seasonality</span>
+  formula = y ~ Promo1 * Promo2,    <span class="code-comment"># Include interaction term</span>
+  regressors = <span class="code-string">"use"</span>                <span class="code-comment"># Use regressors in both fitting and forecasting</span>
+)
+
+<span class="code-comment"># Model summary</span>
+<span class="code-function">summary</span>(adam_model)
+
+<span class="code-comment"># Extract regressor coefficients</span>
+coef_promo1 <- <span class="code-function">coef</span>(adam_model)[<span class="code-string">"Promo1"</span>]
+coef_promo2 <- <span class="code-function">coef</span>(adam_model)[<span class="code-string">"Promo2"</span>]
+coef_interaction <- <span class="code-function">coef</span>(adam_model)[<span class="code-string">"Promo1:Promo2"</span>]
+
+<span class="code-function">cat</span>(<span class="code-string">"\nPromotional Effects (Multiplicative):\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Promo1 alone:     +"</span>, <span class="code-function">round</span>(coef_promo1 * <span class="code-number">100</span>, <span class="code-number">1</span>), <span class="code-string">"%\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Promo2 alone:     +"</span>, <span class="code-function">round</span>(coef_promo2 * <span class="code-number">100</span>, <span class="code-number">1</span>), <span class="code-string">"%\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Interaction:      "</span>, <span class="code-function">round</span>(coef_interaction * <span class="code-number">100</span>, <span class="code-number">1</span>), <span class="code-string">"%\n"</span>)
+<span class="code-comment"># Promotional Effects (Multiplicative):
+#   Promo1 alone:     +36.3%
+#   Promo2 alone:     +15.7%
+#   Interaction:      -75.8%</span>
+
+<span class="code-comment"># Net effect when both promotions run together:</span>
+net_effect <- coef_promo1 + coef_promo2 + coef_interaction
+<span class="code-function">cat</span>(<span class="code-string">"  Net (both):       "</span>, <span class="code-function">round</span>(net_effect * <span class="code-number">100</span>, <span class="code-number">1</span>), <span class="code-string">"%\n"</span>)
+<span class="code-comment">#   Net (both):       -23.8%  <- NEGATIVE when both run together!</span>
+
+<span class="code-comment"># Compare AICc: ADAM with regressors vs standard ETS</span>
+ets_baseline <- <span class="code-function">adam</span>(model_data$y, model = <span class="code-string">"MAA"</span>, lags = <span class="code-number">7</span>)
+
+<span class="code-function">cat</span>(<span class="code-string">"\nModel Comparison (AICc):\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  ADAM with promos:"</span>, <span class="code-function">round</span>(<span class="code-function">AICc</span>(adam_model), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"  Standard ETS:    "</span>, <span class="code-function">round</span>(<span class="code-function">AICc</span>(ets_baseline), <span class="code-number">1</span>), <span class="code-string">"\n"</span>)
+<span class="code-comment"># Model Comparison (AICc):
+#   ADAM with promos: 558.4
+#   Standard ETS:     721.5  <- Much worse without promotions!</span></code></pre>
+
+									<div class="box">
+										<h4>ADAM Model Results</h4>
+										<div class="table-wrapper">
+											<table>
+												<thead>
+													<tr>
+														<th>Parameter</th>
+														<th>Estimate</th>
+														<th>Interpretation</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><strong>Promo1</strong></td>
+														<td>+36.3%</td>
+														<td>Significant positive impact when run alone</td>
+													</tr>
+													<tr>
+														<td><strong>Promo2</strong></td>
+														<td>+15.7%</td>
+														<td>Moderate positive impact when run alone</td>
+													</tr>
+													<tr>
+														<td><strong>Promo1 × Promo2</strong></td>
+														<td>-75.8%</td>
+														<td>Strong negative interaction (cannibalization)</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Forecasting Methods Comparison -->
+									<h2>5. Forecasting Methods Comparison</h2>
+
+									<pre><code><span class="code-comment"># ============================================================
+# COMPARE SIMPLE FORECASTING METHODS
+# ============================================================</span>
+
+<span class="code-comment"># Seasonal Naive: Use same day last week as forecast</span>
+snaive_fc <- <span class="code-function">snaive</span>(sales_ts, h = <span class="code-number">14</span>)
+
+<span class="code-comment"># Moving Average with k=7 (spans one seasonal cycle)</span>
+<span class="code-comment"># This smooths out weekly seasonality</span>
+ma_fc <- <span class="code-function">forecast</span>(<span class="code-function">sma</span>(sales_ts, order = <span class="code-number">7</span>), h = <span class="code-number">14</span>)
+
+<span class="code-comment"># Simple Exponential Smoothing</span>
+ses_model <- <span class="code-function">ses</span>(sales_ts, h = <span class="code-number">14</span>)
+<span class="code-function">cat</span>(<span class="code-string">"SES alpha:"</span>, <span class="code-function">round</span>(ses_model$model$par[<span class="code-string">"alpha"</span>], <span class="code-number">4</span>), <span class="code-string">"\n"</span>)
+<span class="code-comment"># SES alpha: 0.0857  <- Very low alpha = heavy smoothing</span>
+
+<span class="code-comment"># ETS with automatic model selection</span>
+ets_model <- <span class="code-function">ets</span>(sales_ts)
+<span class="code-function">print</span>(ets_model)
+<span class="code-comment"># ETS(M,A,A) selected automatically</span>
+
+ets_fc <- <span class="code-function">forecast</span>(ets_model, h = <span class="code-number">14</span>)
+
+<span class="code-comment"># Why k=7 for Moving Average?</span>
+<span class="code-comment"># k=7 averages exactly one week of data</span>
+<span class="code-comment"># This cancels out the weekly seasonal pattern:</span>
+<span class="code-comment"># (Mon + Tue + Wed + Thu + Fri + Sat + Sun) / 7 ≈ mean level</span>
+
+<span class="code-comment"># Why is SES working despite seasonality?</span>
+<span class="code-comment"># The very low alpha (0.0857) means SES averages across ~12 observations</span>
+<span class="code-comment"># This implicitly spans nearly 2 seasonal cycles, smoothing seasonality</span></code></pre>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>Method</th>
+													<th>Captures Trend?</th>
+													<th>Captures Seasonality?</th>
+													<th>Captures Promotions?</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Seasonal Naïve</td>
+													<td>No</td>
+													<td>Yes</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td>Moving Average (k=7)</td>
+													<td>No</td>
+													<td>No*</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td>SES (α=0.086)</td>
+													<td>No</td>
+													<td>No</td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td><strong>ETS(M,A,A)</strong></td>
+													<td><strong>Yes</strong></td>
+													<td><strong>Yes</strong></td>
+													<td>No</td>
+												</tr>
+												<tr>
+													<td><strong>ADAM + Regressors</strong></td>
+													<td><strong>Yes</strong></td>
+													<td><strong>Yes</strong></td>
+													<td><strong>Yes</strong></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<p><em>*MA with k=7 smooths out seasonality by averaging exactly one week.</em></p>
+
+									<hr class="major" />
+
+									<!-- Business Recommendations -->
+									<h2>6. Business Recommendations</h2>
+
+									<div class="row">
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-check" style="color: green;"></span> Continue Promo1</h3>
+											<p>Promo1 demonstrates statistically significant and economically meaningful uplift (+36%). It should remain the primary promotional lever.</p>
+										</div>
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-search" style="color: orange;"></span> Revise Promo2</h3>
+											<p>Promo2's impact (+16%) is weaker and it tends to run on low-sales days. Investigate why it's less effective and consider repositioning.</p>
+										</div>
+										<div class="col-4 col-12-medium">
+											<h3><span class="icon solid fa-times" style="color: red;"></span> Avoid Overlap</h3>
+											<p>Running both promotions together creates cannibalization (-76% interaction). <strong>Never run both simultaneously.</strong></p>
+										</div>
+									</div>
+
+									<hr class="major" />
+
+									<!-- Key Learnings -->
+									<h2>Key Learnings</h2>
+									<ul>
+										<li><strong>Decomposition reveals hidden patterns:</strong> Without decomposition, promotional effects would be confounded with seasonality.</li>
+										<li><strong>Residual analysis is powerful:</strong> Large residuals aren't just noise — they often indicate external drivers like promotions.</li>
+										<li><strong>Interaction effects matter:</strong> The cannibalization effect would be missed without modeling the Promo1 × Promo2 interaction.</li>
+										<li><strong>Apparent trends can be misleading:</strong> What looked like a 60% trend was partially promotional lift.</li>
+									</ul>
+
+									<hr class="major" />
+
+									<!-- AI Statement -->
+									<h2>AI Assistance Statement</h2>
+									<p>Large Language Models (Claude) were used to support R coding and debugging. All analytical decisions, interpretations, and conclusions are my own.</p>
+
+									<hr class="major" />
+
+									<!-- Navigation -->
+									<ul class="actions">
+										<li><a href="../case-studies.html" class="button">← Back to Case Studies</a></li>
+										<li><a href="demand-forecasting.html" class="button">Next: Demand Forecasting →</a></li>
+									</ul>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="../index.html">Home</a></li>
+										<li><a href="../about.html">About Me</a></li>
+										<li>
+											<span class="opener active">Case Studies</span>
+											<ul>
+												<li><a href="promotional-impact.html">Promotional Impact Analysis</a></li>
+												<li><a href="demand-forecasting.html">Demand Forecasting</a></li>
+												<li><a href="otif-dashboard.html">OTIF Dashboard</a></li>
+												<li><a href="../case-studies.html">View All</a></li>
+											</ul>
+										</li>
+										<li><a href="../blog.html">Blog</a></li>
+										<li><a href="../contact.html">Contact</a></li>
+									</ul>
+								</nav>
+
+							<!-- Project Info -->
+								<section>
+									<header class="major">
+										<h2>Project Info</h2>
+									</header>
+									<ul class="alt">
+										<li><strong>Type:</strong> IIF Certified</li>
+										<li><strong>Program:</strong> Lancaster CMAF</li>
+										<li><strong>Tools:</strong> R, ggplot2, smooth</li>
+										<li><strong>Status:</strong> Completed (Pass)</li>
+									</ul>
+								</section>
+
+							<!-- Key Results -->
+								<section>
+									<header class="major">
+										<h2>Key Results</h2>
+									</header>
+									<ul class="alt">
+										<li>Promo1: <strong>+36%</strong> uplift</li>
+										<li>Promo2: <strong>+16%</strong> uplift</li>
+										<li>Combined: <strong>-76%</strong> interaction</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Islam Helmy. All rights reserved.<br />Design: <a href="https://html5up.net">HTML5 UP</a></p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>
